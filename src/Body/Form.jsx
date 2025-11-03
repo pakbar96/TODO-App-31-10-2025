@@ -1,14 +1,11 @@
-import { useState } from "react";
+import {memo} from "react";
 
-
-function Form({ addEvent, task, setTask}) { 
+const Form = memo(({ addEvent, task, setTask}) => { 
     
     const handleAdd = (event) =>{
          
         event.preventDefault();
-            addEvent()  
-            setTask({Id:0, Task:'', Status:''})        
-           
+            addEvent()             
     }
 
     return (
@@ -37,6 +34,6 @@ function Form({ addEvent, task, setTask}) {
             </form>
         </>
     )
-}
+})
 
 export default Form;

@@ -1,12 +1,12 @@
+import { memo } from 'react';
 
-
-function Footer() {
+const Footer= memo(() => {
     
     return(
         <>
-        <p>Reserved with Todo App</p>
+        <p>Reserved with To-Do App version @0311</p>
         </>
     )
-}
+})
 
 export default Footer;

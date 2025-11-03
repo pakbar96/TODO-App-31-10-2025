@@ -1,6 +1,6 @@
+import { memo } from "react";
 
-
-function SearchBar({term, setSearchTerm}) {
+const SearchBar = memo(({term, setSearchTerm}) => {
     
     return(
         <>
@@ -12,6 +12,6 @@ function SearchBar({term, setSearchTerm}) {
         </input>
         </>
     )
-}
+})
 
 export default SearchBar;

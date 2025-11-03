@@ -1,6 +1,7 @@
 import SearchBar from "./SearchBar";
+import {memo} from "react";
 
-function FormList({taskData, EditTask, DeleteTask, setSearchTerm}) {
+const FormList= memo(({taskData, EditTask, DeleteTask, setSearchTerm}) => {
     return(
         <>
         <h2 className="title">Form List</h2>
@@ -35,6 +36,6 @@ function FormList({taskData, EditTask, DeleteTask, setSearchTerm}) {
             </table>
         </>
     )
-}
+})
 
 export default FormList;
