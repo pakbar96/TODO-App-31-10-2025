@@ -5,6 +5,7 @@ const Footer= memo(() => {
     return(
         <>
         <p>Reserved with To-Do App version @0311</p>
+        <p>A Simple TODO App Works with Browser Local Storage.</p>
         </>
     )
 })

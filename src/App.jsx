@@ -1,5 +1,5 @@
 import './App.css'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import Header from './Header/Header'
 import Footer from './Footer/Footer'
 import Form from './Body/Form'
@@ -17,40 +17,65 @@ function App() {
 const [task, setTask] = useState({Id:0, Task:'', Status:''})
 const [search, setSearch] = useState('')
 const [searchTerm, setSearchTerm] = useState('')
-const [taskList, setTaskList] = useState([]);
+const [taskList, setTaskList] = useState( JSON.parse(localStorage.getItem('taskList')) || [] );
 
 
 // Function to add a new task or update an existing task
 const AddTask = useCallback(() => {
-  if(task.Task === '' || task.Status === ''){
-    alert('Please fill all the fields')
-    return
+  if (task.Task.trim() === '' || task.Status.trim() === '') {
+    alert('Please fill all the fields');
+    return;
   }
-  if(task.Id == 0){
-  setTaskList([...taskList , {Id:Date.now(), Task: task.Task, Status: task.Status}])
-  }
-  else{
-    setTaskList(taskList.map(item => item.Id === task.Id ? task : item))
-  }  
-  setTask({Id:0, Task:'', Status:''})    
-}, [task, taskList]);
+
+  setTaskList(prevList => {
+    let updatedList;
+
+    if (task.Id === 0) {
+      // ADD NEW TASK
+      updatedList = [...prevList, { ...task, Id: Date.now() }];
+    } else {
+      // UPDATE EXISTING TASK
+      updatedList = prevList.map(item =>
+        item.Id === task.Id ? task : item
+      );
+    }
+
+    // sync to localStorage
+    localStorage.setItem('taskList', JSON.stringify(updatedList));
+    return updatedList;
+  });
+
+  // reset form
+  setTask({ Id: 0, Task: '', Status: '' });
+
+}, [task]);
 
 // Function to edit a task by its ID
 // itemID is the ID of the task to be edited
 const EditTask = useCallback((itemID) => {
-   let filData = taskList.find(x => x.Id == itemID)
-    if(filData)
-    {
-     setTask(filData);
-    }
-}, [taskList])
+  const storedList = JSON.parse(localStorage.getItem('taskList') || '[]');
+  const selected = storedList.find(item => item.Id === itemID);
+
+  if (selected) {
+    setTask(selected);
+  }
+
+}, []);
 
 
 // Function to delete a task by its ID
 // itemID is the ID of the task to be deleted
 const DeleteTask = useCallback((itemID) => {
-   setTaskList(taskList.filter(item => item.Id != itemID))
-}, [taskList])
+  
+  const updatedList = taskList.filter(item => item.Id !== itemID);
+
+  // Update state → triggers UI re-render
+  setTaskList(updatedList);
+
+  // Update localStorage → persist data
+  localStorage.setItem("taskList", JSON.stringify(updatedList));
+
+}, [taskList]);
 
 // Function to filter the task list based on the search term
 // value is the search input value, 
@@ -63,12 +88,23 @@ const FilterSearch = useCallback((value, term) => {
 
 // Memoized filtered list based on the search term and search input value
 const filteredList = useMemo(() => {
-  return taskList.filter(item => 
-    searchTerm === 'Task' 
-      ? item.Task.toLowerCase().includes(search.toLowerCase())
-      : item.Status.toLowerCase().includes(search.toLowerCase())
-  );
-}, [taskList,searchTerm, search]);
+  if (!taskList) return [];
+
+  return taskList.filter(item => {
+    const value = search.toLowerCase();
+
+    if (searchTerm === 'Task') {
+      return item.Task.toLowerCase().includes(value);
+    }
+
+    if (searchTerm === 'Status') {
+      return item.Status.toLowerCase().includes(value);
+    }
+
+    return true; // no filter
+  });
+
+}, [search, searchTerm, taskList]);
 
 
   return (
@@ -83,7 +119,7 @@ const filteredList = useMemo(() => {
         addEvent={AddTask}   
       />
       { 
-      taskList.length > 0 &&
+      taskList?.length > 0 &&
       <FormList 
         taskData={filteredList} 
         EditTask={EditTask}
